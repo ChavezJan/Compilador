@@ -1,0 +1,112 @@
+void variables(void){
+
+            lexema=lexico(token);
+
+            GpoVars();
+
+}
+
+ 
+
+GpoVars(void){
+
+            GpoIds();
+
+            if(strcmp(lexema,":")){
+
+                        Error("Sintaxis", "Se esperaba<:>");
+
+            }
+
+            lexema=lexico(token);
+
+            tipo();
+
+            if(strcmp(lexema,";")){
+
+                        Error("Sintaxis", "Se esperaba<;>");
+
+            }
+
+            lexema=lexico(token);
+
+            if(!strcmp(token,"Iden")){
+
+                        GpoVars();
+
+            }
+
+}
+
+ 
+
+GpoIds(void){
+
+            if(strcmp(token,"Iden")){
+
+                        Error("Sintaxis", "Se esperaba<Iden>");
+
+            }
+
+            lexema=lexico(token);
+
+            if(!strcmp(lexema,"[")){
+
+                        Dimens();
+
+            }
+
+            if(!strcmp(lexema,",")){
+
+                        lexema=lexico(token);
+
+                        GpoIds();
+
+            }
+
+}
+
+ 
+
+void Tipo(){
+
+            if(strcmp(lexema,"entero")|
+
+                        strcmp(lexema,"real")||
+
+                        strcmp(lexema,"logico")||
+
+                        strcmp(lexema,"alfabetico"))
+
+                        Error("Sintaxis","Se esperaba <entero|real|logico|alfabetico>");
+
+            lexema=lexico(token);
+
+}
+
+ 
+
+void Dimens(){
+
+            lexema=lexico(token);
+
+            if(strcmp(token,"CteEnt")&&(strcmp(token,"Iden"))
+
+                        Error("Sintaxis","Se esperaba <CteEnt>|<Iden>");
+
+            lexema=lexico(token);
+
+            if(strcmp(lexema,"]"))
+
+                        Error("Sintaxis","Se esperaba <]>");
+
+            lexema=lexico(token);
+
+            if(!strcmp(lexema,"[")){
+
+                        Dimens();
+
+            }          
+
+}
+
