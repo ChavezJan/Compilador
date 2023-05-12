@@ -1,3 +1,2 @@
-def main() -> None:
-    print("gola")
-
+if __name__ == "__main__":
+    print("Hola")
