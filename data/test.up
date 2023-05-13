@@ -1,0 +1,4 @@
+variables	i,j,k,n, vector[MAX], matriz[MAX][MAX]:entero;
+		r,h,s:real;
+		alfa,beta:alfanumerico;
+		log1,log2:logico;

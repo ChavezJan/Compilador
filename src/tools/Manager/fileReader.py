@@ -1,12 +1,12 @@
 """
     Name: Jorge Alejandro Chavez Nuñez
+    Name: Sebastian Garcia Aguirre
     ID: 0199414
+    ID: 0214778
 """
 
 def fileReader():
 
-    #print("Enter the file to test:\n1) input1\n2) input2\n3) input3\n4) input4\n5) input5\n6) input6\n7) input7")
-    #inputFile = str(inputManager((input()),("1","2","3","4","5","6","7")))
     try:
         fileR = open("./data/ArchivoPrueba.up","r")
     except:
@@ -15,6 +15,8 @@ def fileReader():
 
     fileR = fileR.read().split("\n")
     fileNocomments = ""
+
+    changeSpace = False
 
     numOfLines = 0
     for line in fileR:
@@ -25,7 +27,13 @@ def fileReader():
             else:
                 if (char == "/"):
                     comentario += 1
+                elif(char == " "):
+                    changeSpace = True
+                    fileNocomments += char
+                elif(changeSpace == True and char == " "):
+                    changeSpace = True
                 else:
+                    changeSpace = False
                     fileNocomments += char
         numOfLines += 1
         fileNocomments += "\n"
