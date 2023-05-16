@@ -1,5 +1,4 @@
-Lexemas Manager - 2023-05-12
+Lexemas Manager - 2023-05-15
 ------------------------------
 |    Lexema    |    Token    |
 ------------------------------
-| alfa | <Ident> |

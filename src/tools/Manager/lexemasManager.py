@@ -19,15 +19,15 @@ def output(x,y):
 """
 def fileLexCreate() -> None:
     today = date.today()
-    if os.path.exists("./data/LexemasFile.lex"):
+    if os.path.exists("./out/LexemasFile.lex"):
         print("The file does exist.")
         print("Deleting...")
-        os.remove("./data/LexemasFile.lex")
+        os.remove("./out/LexemasFile.lex")
         fileLexCreate()
     else:
         print("The file does not exist.")
         print("Creating...\n")
-        newFile = open("./data/LexemasFile.lex","x")
+        newFile = open("./out/LexemasFile.lex","x")
         text = "Lexemas Manager - "+str(today) + "\n"
         text += "------------------------------\n"
         text += "|    Lexema    |    Token    |\n"
@@ -37,7 +37,7 @@ def fileLexCreate() -> None:
 
 
 def writeLexTitle(lex,token):
-    file = open("./data/LexemasFile.lex","a")
+    file = open("./out/LexemasFile.lex","a")
     text = f"| {lex} | {token} |\n"
     file.write(text)
     file.close()

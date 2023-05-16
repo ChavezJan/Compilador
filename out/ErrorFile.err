@@ -1,5 +1,5 @@
-Error Manager - 2023-05-12
+Error Manager - 2023-05-15
 -----------------------------------------------------------------------------
 | Linea | Error |        Descripción        |        Linea del Error        |
 -----------------------------------------------------------------------------
-| 10 | 14. | <lexico>Se esparaba <digito> | a:=b+14;
+| 1 | . | <Lexico>Error ALFANUMERICO | 2.1.2
