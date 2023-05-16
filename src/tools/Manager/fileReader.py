@@ -8,7 +8,7 @@
 def fileReader():
 
     try:
-        fileR = open("./data/ArchivoPrueba.up","r")
+        fileR = open("./data/test.up","r")
     except:
         print("ERROR: Archivo buscado no encontrado")
         return "ERROR"
@@ -23,7 +23,8 @@ def fileReader():
         comentario = 0
         for char in line:
             if(comentario == 2):
-                print("Comentario")
+                # print("Comentario")
+                comentario = comentario
             else:
                 if (char == "/"):
                     comentario += 1

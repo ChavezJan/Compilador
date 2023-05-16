@@ -1,3 +1,5 @@
+constantes 	PI:=3.141593;
+		MAX:=30;
 variables	i,j,k,n, vector[MAX], matriz[MAX][MAX]:entero;
 		r,h,s:real;
 		alfa,beta:alfanumerico;

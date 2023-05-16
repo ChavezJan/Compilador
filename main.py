@@ -9,6 +9,8 @@ from src.assets.test import *
 from src.tools.Manager.fileReader import *
 from src.tools.Manager.errorManager import *
 from src.tools.Manager.lexemasManager import *
+
+from src.tools.lexico.lexPass import *
 from src.tools.semantico.semanticPass import * 
 
 
@@ -19,10 +21,18 @@ if __name__ == "__main__":
     
     fileNoComments, numOfLines = fileReader()
     
+    # Pase Lexico
+    #test()
+
+    # Pase Sintactico
+
+    # Pase Semantico
+    SemanticPass(fileNoComments)
+
 
     # TEST
     writeErrTitle(10,"14.","<lexico>Se esparaba <digito>", "a:=b+14;")
     writeLexTitle("alfa","<Ident>")
     
-    print(fileNoComments)
-    print(numOfLines)
+    # print(fileNoComments)
+    # print(numOfLines)
