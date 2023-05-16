@@ -5,6 +5,7 @@
     ID: 0214778
 """
 from src.tools.Manager.errorManager import Error,IllegalCharError
+from src.tools.Manager.lexemasManager import *
 
 ##############
 # CONSTANTES # 
@@ -22,7 +23,7 @@ TT_FLOAT = 'REAl'
 TT_STRING = 'ALFANUMERICO'
 TT_BOOL = 'LOGICO'
 
-# OPERADORES ARITMETICOS #
+# OPERADORES ARITMETICOS <OpArit> #
 TT_PLUS = 'SUMA'
 TT_MINUS = 'RESTA'
 TT_MUL = 'MULTIPLICACION'
@@ -30,7 +31,7 @@ TT_DIV = 'DIVISION'
 TT_MOD = 'MODULO'
 TT_POW = 'POTENCIA'
 
-# DELIMITADORES #
+# DELIMITADORES <Delim> #
 TT_LPAREN = 'LPAREN'
 TT_RPAREN = 'RPAREN'
 TT_LBRA = 'LBRA'
@@ -42,17 +43,22 @@ TT_COMA = 'COMA'
 TT_DOBDOT = 'DOBDOT'
 TT_SEMCOMA = 'SEMCOMA'
 
-# OPERADORES RELACIONALES #
-TT_LPAREN = 'LPAREN'
-TT_RPAREN = 'RPAREN'
-TT_LBRA = 'LBRA'
-TT_RBRA = 'RBRA'
-TT_NL = 'NL'
-TT_TAB = 'TAB'
-TT_DOT = 'DOT'
-TT_COMA = 'COMA'
-TT_DOBDOT = 'DOBDOT'
-TT_SEMCOMA = 'SEMCOMA'
+# OPERADORES RELACIONALES <OpRel> # 
+TT_IGUAL = 'IGUAL'
+TT_DIF = 'DIFERENTE'
+TT_MENQ = 'MENORQUE'
+TT_MAYQ = 'MAYORQUE'
+TT_MAYIG = 'MAYOR_IGUAL'
+TT_MENIG = 'MENOR_IGUAL'
+
+# OPERADORES LOGICOS <OpLog> #
+TT_Y = 'Y'
+TT_O = 'O'
+TT_NO = 'NO'
+
+# OPERADOR DE ASIGNACION <OpAsig> #
+TT_ASIG = 'ASIGNACION'
+
 
 ##########
 # TOKENS # 
@@ -127,21 +133,27 @@ class Lexico:
             ########################## 
 
             elif self.current_char == '+':
+                writeLexTitle(lex='+',token='OpArit')
                 tokens.append(Token(TT_PLUS))
                 self.advance()
             elif self.current_char == '-':
+                writeLexTitle(lex='-',token='OpArit')
                 tokens.append(Token(TT_MINUS))
                 self.advance()
             elif self.current_char == '*':
+                writeLexTitle(lex='*',token='OpArit')
                 tokens.append(Token(TT_MUL))
                 self.advance()
             elif self.current_char == '/':
+                writeLexTitle(lex='/',token='OpArit')
                 tokens.append(Token(TT_DIV))
                 self.advance()
             elif self.current_char == '%':
+                writeLexTitle(lex='%',token='OpArit')
                 tokens.append(Token(TT_MOD))
                 self.advance()
             elif self.current_char == '^':
+                writeLexTitle(lex='^',token='OpArit')
                 tokens.append(Token(TT_POW))
                 self.advance()
             
@@ -184,8 +196,10 @@ class Lexico:
             self.advance()
 
         if dot_count==0:
+            writeLexTitle(lex=num_srt,token='CteEnt')
             return Token(TT_INT, int(num_srt))
         else:
+            writeLexTitle(lex=num_srt,token='CteReal')
             return Token(TT_FLOAT, float(num_srt ))
         
 #####################
@@ -197,3 +211,5 @@ def runBasicLex(text):
     tokens, error = lexico.make_token()
     
     return tokens, error
+
+
