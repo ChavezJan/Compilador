@@ -14,7 +14,7 @@ from src.tools.Manager.lexemasManager import *
 from src.tools.semantico.semanticPass import * 
 
 # TEST
-from src.tools.lexico.basic import *
+from src.tools.lexico.lexe import *
 
 
 
