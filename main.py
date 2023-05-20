@@ -30,7 +30,7 @@ if __name__ == "__main__":
     
     text = input('basic > ')
     try:
-        result, ast ,error = runBasicLex(fileNoComments)
+        result, ast ,error = runBasicLex(text)
         if error: print(error.as_string())
         else: print(f'{result} \n{ast}')
     except:

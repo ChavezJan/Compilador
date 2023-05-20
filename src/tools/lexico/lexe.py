@@ -43,7 +43,7 @@ TT_DOT = 'DOT'
 TT_COMA = 'COMA'
 TT_DOBDOT = 'DOBDOT'    # -> :
 TT_SEMCOMA = 'SEMCOMA'  # -> ;
-Delim = ['(',')','[',']','\t','\n','.',',',':',';']
+Delim = ['(',')''[',']','\t','\n','.',',',':',';']
 
 # OPERADORES RELACIONALES <OpRel> # 
 TT_IGUAL = 'IGUAL'
@@ -310,7 +310,7 @@ class Lexico:
         while self.current_char != None and self.current_char not in Delim and self.current_char != ' ':
             op_String += self.current_char
             self.advance()
-        print(self.current_char)
+
         if self.current_char not in Delim:
             IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO: Esperado ';', ',', '.', ':'",codeError=op_String)
         else:
@@ -516,25 +516,29 @@ def runBasicLex(text):
     lexico = Lexico(text)
     tokens, error = lexico.make_token() 
 
-    print(tokens)
-    tokens.remove(None)
+    #tokens.remove(None)
+    # print(tokens)
 
-    print(tokens)
+    # print(tokens)
 
     if len(tokens) <= 1:
         writeErrTitle("#"," - ", "<FatalError>","No se generaron tokens")
-        return None,None,None
+        # return None,None,None
 
     if error: return None, error
 
     # Generate AST 
-    parser = Parser(tokens)
-    ast = parser.parse()
+    # parser = Parser(tokens)
+    # ast = parser.parse()
+    # return tokens, ast.node ,ast.error
 
-    print(ast.node)
-    print(ast.error)
+    # print(ast.node)
+    # print(ast.error)
     
-    return tokens, ast.node ,ast.error
+    return tokens, None ,None
 
 
 
+#(21+2)*2
+
+# (21:entero, suma, 2 entreo),mult*2
