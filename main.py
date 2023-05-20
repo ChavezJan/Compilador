@@ -27,10 +27,15 @@ if __name__ == "__main__":
     # Pase Lexico
     
     text = input('basic > ')
-    result, error, = runBasicLex(text)
+    try:
+        result, ast ,error = runBasicLex(text)
+        if error: print(error.as_string())
+        else: print(f'{result} \n{ast}')
+    except:
+        print(f'ERROR')
+        
 
-    if error: print(error.as_string())
-    else: print(result)
+
     # Pase Sintactico
 
     # Pase Semantico

@@ -2,4 +2,8 @@ Lexemas Manager - 2023-05-19
 ------------------------------
 |    Lexema    |    Token    |
 ------------------------------
-| 2. | CteReal |
+| ( | Delim |
+| 2 | CteEnt |
+| + | OpArit |
+| 3 | CteEnt |
+| ) | Delim |

@@ -4,7 +4,7 @@
     ID: 0199414
     ID: 0214778
 """
-from src.tools.Manager.errorManager import Error,IllegalCharError
+from src.tools.Manager.errorManager import *
 from src.tools.Manager.lexemasManager import *
 
 ##############
@@ -12,7 +12,6 @@ from src.tools.Manager.lexemasManager import *
 ##############
 
 DIGITS = '0123456789'
-
 
 ##############
 # TOKENS DIC # 
@@ -60,6 +59,9 @@ TT_NO = 'NO'
 # OPERADOR DE ASIGNACION <OpAsig> #
 TT_ASIG = 'ASIGNACION'
 
+# Extras #
+TT_EOF = 'ENDOFFUNC'
+
 
 ##########
 # TOKENS # 
@@ -85,7 +87,7 @@ class Position:
         self.col = col
         self.text = text
 
-    def advance(self, current_char):
+    def advance(self, current_char=None):
         self.idx += 1
         self.col += 1
 
@@ -117,19 +119,42 @@ class Lexico:
         tokens = []
 
         while self.current_char != None:
-            if self.current_char in ' ':
+            line = self.pos.ln + 1
+            char = self.current_char
+            if self.current_char in ' \t':
                 self.advance()
-            elif self.current_char == '\t':
-                writeLexTitle(lex='\_t',token='Delim')
-                tokens.append(Token(TT_TAB))
-                self.advance()
-            
+            # elif self.current_char == '\t':
+            #     writeLexTitle(lex='\_t',token='Delim')
+            #     tokens.append(Token(TT_TAB))
+            #     self.advance()
+# 123.4            
             ###########
             # DIGITOS #
             ###########
 
             elif self.current_char in DIGITS:
-                tokens.append(self.make_number())
+                tokens.append(self.make_number(line,char))
+
+# def make_number(self):
+#         num_srt = ''
+#         dot_count = 0
+
+#         while self.current_char != None and self.current_char in DIGITS + '.':
+#             if self.current_char == '.':
+#                 if dot_count == 1: break #ERROR LEXICO, No se permiten mas de dos decimales
+#                 dot_count += 1  
+#                 num_srt += '.'
+#             else:
+#                 num_srt += self.current_char
+#             self.advance()
+
+#         if dot_count==0:
+#             writeLexTitle(lex=num_srt,token='CteEnt')
+#             return Token(TT_INT, int(num_srt))
+#         else:
+#             writeLexTitle(lex=num_srt,token='CteReal')
+#             return Token(TT_FLOAT, float(num_srt ))
+
 
             ########################## 
             # OPERADORES ARITMETICOS #
@@ -205,6 +230,9 @@ class Lexico:
             # OPERADORES RELACIONALES <OpRel> #
             ###################################
 
+            elif self.current_char == '<':
+                tokens.append(self.Op_Log())
+
             elif self.current_char == '=' and self.current_char != '<=':
                 writeLexTitle(lex='=',token='OpRel')
                 tokens.append(Token(TT_IGUAL))
@@ -213,8 +241,6 @@ class Lexico:
             # elif self.current_char in DIGITS:
             #     tokens.append(self.make_number())
 
-            elif self.current_char == '<':
-                tokens.append(self.Op_Log())
                 
             #  #
             # Agregar los identificadores de:
@@ -253,10 +279,10 @@ class Lexico:
                 char = self.current_char
                 self.advance()
                 # line, error, description, codeError
-                return [], IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=self.pos.text)
+                # return ["-"], IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=self.pos.text)
                 
 
-
+        tokens.append(Token(TT_EOF))
         return tokens, None
 
         # Agregar los identificadores de:
@@ -282,13 +308,13 @@ class Lexico:
               
 
 
-    def make_number(self):
+    def make_number(self,line,char):
         num_srt = ''
         dot_count = 0
 
         while self.current_char != None and self.current_char in DIGITS + '.':
             if self.current_char == '.':
-                if dot_count == 1: break #ERROR LEXICO, No se permiten mas de dos decimales
+                if dot_count == 1: return ["-"], IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=self.pos.text)#break #ERROR LEXICO, No se permiten mas de dos decimales
                 dot_count += 1
                 num_srt += '.'
             else:
@@ -321,6 +347,41 @@ class BinOpNode:
 
     def __repr__(self) -> str:
         return f'({self.left_node}, {self.op_tok}, {self.right_node})'
+    
+class UnaryOpNode:
+    def __init__(self,op_tok,node):
+        self.op_tok = op_tok
+        self.node = node
+
+    def __repr__(self) -> str:
+        return f'({self.op_tok},{self.node})'
+        
+
+#################
+# PARSER RESULT # 
+#################
+
+class ParserResult:
+    def __init__(self):
+        self.error = None
+        self.node = None
+
+    def register(self, res):
+        if isinstance(res, ParserResult):
+            if res.error: self.error = res.error
+            return res.node
+        
+        return res
+
+    def success(self, node):
+        self.node = node
+        return self
+
+
+    def fail(self, error):
+        self.error = error
+        return self
+
 
 ##########
 # PARSER # 
@@ -329,7 +390,7 @@ class BinOpNode:
 class Parser:
     def __init__(self,tokens):
         self.tokens = tokens
-        self.tok_idx = 1
+        self.tok_idx = -1
         self.advance()
 
     def advance(self):
@@ -341,18 +402,43 @@ class Parser:
     #####################
     def parse(self):
         res = self.expr()
+        if not res.error and self.current_tok.type != TT_EOF:
+            return res.fail(IllegalSyntaxError(line=1,error="error",description="IllegalSyntaxError: Esperado '+', '-', '*', '/', '^', '%',",codeError="test"))
         return res
     
     def factor(self):
+        res =  ParserResult()
         tok = self.current_tok
 
-        if tok.type in (TT_INT,TT_FLOAT):
-            self.advance()
-            return NumberNode(tok)
-        pass
+        if tok.type in (TT_PLUS,TT_MINUS):
+            res.register(self.advance())
+            factor = res.register(self.factor())
+            if res.error: return res
+            return res.success(UnaryOpNode(tok,factor))
+        
+        elif tok.type in (TT_INT,TT_FLOAT):
+            res.register(self.advance())
+            return res.success(NumberNode(tok))
+        
+        elif tok.type == TT_LPAREN:
+            res.register(self.advance())
+            expr = res.register(self.expr())
+            if res.error: return res
+            if self.current_tok.type == TT_RPAREN:
+                res.register(self.advance())
+                return res.success(expr)
+            else:
+                return res.fail(IllegalSyntaxError(line=1,error="error",description="IllegalSyntaxError: Esperado ')'",codeError="test"))
+            
+
+            
+        return res.fail(IllegalSyntaxError(line=1,error="error",description="IllegalSyntaxError: Esperado Entero o Real",codeError="test"))
+
+    def termPow(self):
+        return self.bin_op(self.factor,(TT_MOD, TT_POW))
 
     def term(self):
-        return self.bin_op(self.factor,(TT_MUL, TT_DIV))
+        return self.bin_op(self.termPow,(TT_MUL, TT_DIV))
 
     def expr(self):
         return self.bin_op(self.term,(TT_PLUS, TT_MINUS))
@@ -360,15 +446,18 @@ class Parser:
     #####################
 
     def bin_op(self, func, ops):
-        left = func()
+        res =  ParserResult()
+        left = res.register(func())
+        if res.error: return res
 
         while self.current_tok.type in ops:
             op_tok = self.current_tok
-            self.advance()
-            right = func()
+            res.register(self.advance())
+            right = res.register(func())
+            if res.error: return res
             left = BinOpNode(left,op_tok,right)
 
-        return left
+        return res.success(left)
 
 #####################
 # EXECUTE BASIC LEX # 
@@ -376,12 +465,18 @@ class Parser:
 
 def runBasicLex(text):
     lexico = Lexico(text)
-    tokens, error = lexico.make_token()
+    tokens, error = lexico.make_token() 
+
+    if error: return None, error
 
     # Generate AST 
-    # parser = Parser(tokens)
-    # ast = parser.parse()
+    parser = Parser(tokens)
+    ast = parser.parse()
+
+    if ast:
     
-    return tokens, error
+        return tokens, ast.node ,ast.error
+
+    return None, None,None
 
 

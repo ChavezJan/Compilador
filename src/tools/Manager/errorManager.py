@@ -61,4 +61,11 @@ class Error:
 class IllegalCharError(Error):
     def __init__(self, line, error, description, codeError):
         super().__init__(line, error, description, codeError) 
+
+class IllegalSyntaxError(Error):
+    def __init__(self, line, error, description, codeError):
+        super().__init__(line, error, description, codeError) 
+
+
+        
         
