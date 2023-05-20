@@ -43,7 +43,7 @@ TT_DOT = 'DOT'
 TT_COMA = 'COMA'
 TT_DOBDOT = 'DOBDOT'    # -> :
 TT_SEMCOMA = 'SEMCOMA'  # -> ;
-Delim = [TT_LPAREN,TT_RPAREN,TT_LBRA,TT_RBRA,TT_NL,TT_TAB,TT_DOT,TT_COMA,TT_DOBDOT,TT_SEMCOMA]
+Delim = ['(',')','[',']','\t','\n','.',',',':',';']
 
 # OPERADORES RELACIONALES <OpRel> # 
 TT_IGUAL = 'IGUAL'
@@ -124,7 +124,7 @@ class Lexico:
         tokens = []
 
         while self.current_char != None:
-            print(self.current_char)
+            # print(self.current_char)
             line = self.pos.ln + 1
             char = self.current_char
             if self.current_char in ' \t':
@@ -276,9 +276,8 @@ class Lexico:
             #########
 
             else:
-                # line = self.pos.ln + 1
-                # char = self.current_char
-                tokens.append(self.genString(self,line,char))
+
+                tokens.append(self.genString(line,char))
 
                 # self.advance()
                 # line, error, description, codeError
@@ -303,47 +302,31 @@ class Lexico:
         elif opDelAsig == ":": 
             writeLexTitle(lex=opDelAsig,token='Delim')    
             return Token(TT_DOBDOT)
-        else:
-            return ["-"], IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=opDelAsig)#break #ERROR LEXICO, No se permiten mas de dos decimales
+        else: ########### QUITAR RETURN ###############
+            IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=opDelAsig)#break #ERROR LEXICO, No se permiten mas de dos decimales
 
     def genString(self,line,char):
-# ERROR                if dot_count == 1: return ["-"], IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=self.pos.text)#break #ERROR LEXICO, No se permiten mas de dos decimales
         op_String = ''
-        print(self.current_char)
         while self.current_char != None and self.current_char not in Delim and self.current_char != ' ':
             op_String += self.current_char
-            print(op_String)
             self.advance()
-        return Token(TT_STRING,op_String)
+        print(self.current_char)
+        if self.current_char not in Delim:
+            IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO: Esperado ';', ',', '.', ':'",codeError=op_String)
+        else:
+            writeLexTitle(lex=op_String,token='Ident')    
+            return Token(TT_IDNT,op_String)
 
-        # if dot_count==0:
-        #     writeLexTitle(lex=num_srt,token='CteEnt')
-        #     return Token(TT_INT, int(num_srt))
-        # elif op_String == "constantes":
-        #     writeLexTitle(lex=num_srt,token='CteReal')
-        #     return Token(TT_FLOAT, float(num_srt ))
-        
-            #  #
-            # Agregar los identificadores de:
-            #       <=
-            #       >=
-            #       <>
-            #       <
-            #       >
-            #  #
+      
     def Op_Log(self,line,char):
         opLog = ''
 
         while self.current_char != None and self.current_char != TT_EOF and self.current_char != ' ':
             if self.current_char == '=':
-                print("llego =")
                 opLog += self.current_char
-                
             elif self.current_char == '>':
-                print("llego >")
                 opLog += self.current_char
             elif self.current_char == '<':
-                print("llego <")
                 opLog += self.current_char
             else:                
                 opLog += self.current_char
@@ -368,15 +351,23 @@ class Lexico:
             writeLexTitle(lex=opLog,token='OpRel')    
             return Token(TT_MAYIG, opLog)
         else:
-            return ["-"], IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=opLog)#break #ERROR LEXICO, No se permiten mas de dos decimales
+            IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=opLog)#break #ERROR LEXICO, No se permiten mas de dos decimales
+
 
     def make_number(self,line,char):
         num_srt = ''
         dot_count = 0
 
         while self.current_char != None and self.current_char in DIGITS + '.':
+
             if self.current_char == '.':
-                if dot_count == 1: return ["-"], IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=self.pos.text)#break #ERROR LEXICO, No se permiten mas de dos decimales
+                if dot_count == 1: 
+                    dot_count += 1
+                    char = self.current_char
+                    while self.current_char == '.':
+                        self.advance()
+                    IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO: No esperado el '.'",codeError=self.pos.text)
+
                 dot_count += 1
                 num_srt += '.'
             else:
@@ -386,7 +377,7 @@ class Lexico:
         if dot_count==0:
             writeLexTitle(lex=num_srt,token='CteEnt')
             return Token(TT_INT, int(num_srt))
-        else:
+        elif dot_count == 1:
             writeLexTitle(lex=num_srt,token='CteReal')
             return Token(TT_FLOAT, float(num_srt ))
 
@@ -525,16 +516,25 @@ def runBasicLex(text):
     lexico = Lexico(text)
     tokens, error = lexico.make_token() 
 
+    print(tokens)
+    tokens.remove(None)
+
+    print(tokens)
+
+    if len(tokens) <= 1:
+        writeErrTitle("#"," - ", "<FatalError>","No se generaron tokens")
+        return None,None,None
+
     if error: return None, error
 
     # Generate AST 
     parser = Parser(tokens)
     ast = parser.parse()
 
-    if ast:
+    print(ast.node)
+    print(ast.error)
     
-        return tokens, ast.node ,ast.error
+    return tokens, ast.node ,ast.error
 
-    return None, None,None
 
 

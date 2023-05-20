@@ -2,3 +2,7 @@ Error Manager - 2023-05-20
 -----------------------------------------------------------------------------
 | Linea | Error |        Descripción        |        Linea del Error        |
 -----------------------------------------------------------------------------
+| 1 | c | <Lexico>Error ALFANUMERICO: Esperado ';', ',', '.', ':' | constantes
+| 1 | : | <Lexico>Error ALFANUMERICO | :=:=
+| 3 | : | <Lexico>Error ALFANUMERICO | ::::
+| 1 | error | IllegalSyntaxError: Esperado Entero o Real | test

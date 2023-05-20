@@ -46,7 +46,7 @@ def writeErrTitle(line,error,description,codeError):
     file = open("./out/ErrorFile.err","a")
     text = f"| {line} | {error} | {description} | {codeError}\n"
     file.write(text)
-    file.close()
+
 
 class Error:
     def __init__(self,line,error,description,codeError):
@@ -63,6 +63,7 @@ class Error:
 class IllegalCharError(Error):
     def __init__(self, line, error, description, codeError):
         super().__init__(line, error, description, codeError) 
+
 
 class IllegalSyntaxError(Error):
     def __init__(self, line, error, description, codeError):
