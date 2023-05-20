@@ -43,7 +43,7 @@ TT_DOT = 'DOT'
 TT_COMA = 'COMA'
 TT_DOBDOT = 'DOBDOT'    # -> :
 TT_SEMCOMA = 'SEMCOMA'  # -> ;
-Delim = ['(',')''[',']','\t','\n','.',',',':',';']
+Delim = ['(',')','[',']','\t','\n','.',',',':',';']
 
 # OPERADORES RELACIONALES <OpRel> # 
 TT_IGUAL = 'IGUAL'
@@ -286,7 +286,9 @@ class Lexico:
         conString = False
 
         while self.current_char != None and self.current_char not in Delim and self.current_char != ' ':
-            
+            if (self.current_char in Delim):
+                print(self.current_char)
+
             # Retorna los alfanumericos (Strings)
             if self.current_char == '"' :
                 op_String += self.current_char
