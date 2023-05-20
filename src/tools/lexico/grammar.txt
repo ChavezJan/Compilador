@@ -1,9 +1,18 @@
-expr    : term ((PLUS|MINUS) term)*
-
-term    : termPow ((MUL|DIV) termPow)*
-
-termPow : factor ((MOD|POW) factor)*
+"""
+    Name: Jorge Alejandro Chavez Nuñez
+    Name: Sebastian Garcia Aguirre
+    Name: Daniel Vasquez Casas
+    ID: 0199414
+    ID: 0214778
+    ID: 0208421
+"""
 
 factor  : INT|FLOAT
         : (PLUS|MINUS) factor
         : LPAREN expr RPAREN
+
+termPow : factor ((MOD|POW) factor)*
+
+term    : termPow ((MUL|DIV) termPow)*
+
+expr    : term ((PLUS|MINUS) term)*

@@ -1,9 +1,4 @@
-Lexemas Manager - 2023-05-19
+Lexemas Manager - 2023-05-20
 ------------------------------
 |    Lexema    |    Token    |
 ------------------------------
-| ( | Delim |
-| 2 | CteEnt |
-| + | OpArit |
-| 3 | CteEnt |
-| ) | Delim |

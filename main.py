@@ -1,8 +1,10 @@
 """
     Name: Jorge Alejandro Chavez Nuñez
     Name: Sebastian Garcia Aguirre
+    Name: Daniel Vasquez Casas
     ID: 0199414
     ID: 0214778
+    ID: 0208421
 """
 
 from src.assets.test import *
