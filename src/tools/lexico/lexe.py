@@ -52,8 +52,7 @@ TT_MENQ = 'MENORQUE'
 TT_MAYQ = 'MAYORQUE'
 TT_MENIG = 'MENOR_IGUAL'
 TT_MAYIG = 'MAYOR_IGUAL'
-
-TT_OPREL = '<>='
+OPREL = '<>='
 
 # OPERADORES LOGICOS <OpLog> #
 TT_Y = 'Y'
@@ -64,6 +63,10 @@ TT_NO = 'NO'
 TT_ASIG = 'ASIGNACION'
 TT_IDNT = 'IDENTIFICADOR'
 
+# Palabras reservadas <PalRes>
+TT_PALRES = 'PALRES'
+PalRes = ["constantes", "variables", "real", "alfabetico", "logico", "entero", "funcion", "inicio", "fin", "de", "procedimiento", "regresa", "si", "hacer", "sino", "cuando", "el", "valor", "sea", "otro", "desde", "hasta", "incr", "decr", "repetir", "que", "mientras", "se", "cumpla", "continua", "interrumpe", "limpia", "lee", "imprime", "imprimenl", "verdadero", "falso", "programa", "fin de programa"]
+
 # Extras #
 TT_EOF = 'ENDOFFUNC'
 
@@ -73,9 +76,11 @@ TT_EOF = 'ENDOFFUNC'
 ##########
 
 class Token:
-    def __init__(self, type_, value=None):
+    def __init__(self, type_, line=None ,value=None):
         self.type = type_
         self.value = value
+        self.line = line 
+
 
     def __repr__(self) -> str:
         if self.value: return f'{self.type}:{self.value}'
@@ -122,45 +127,24 @@ class Lexico:
 
     def make_token(self):
         tokens = []
+        line = self.pos.ln + 1
+        char = self.current_char
 
         while self.current_char != None:
             # print(self.current_char)
-            line = self.pos.ln + 1
-            char = self.current_char
             if self.current_char in ' \t':
                 self.advance()
-            # elif self.current_char == '\t':
-            #     writeLexTitle(lex='\_t',token='Delim')
-            #     tokens.append(Token(TT_TAB))
-            #     self.advance()
-# 123.4            
+            elif self.current_char == '\t':
+                writeLexTitle(lex='\_t',token='Delim')
+                tokens.append(Token(TT_TAB))
+                self.advance()
+
             ###########
             # DIGITOS #
             ###########
 
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number(line,char))
-
-# def make_number(self):
-#         num_srt = ''
-#         dot_count = 0
-
-#         while self.current_char != None and self.current_char in DIGITS + '.':
-#             if self.current_char == '.':
-#                 if dot_count == 1: break #ERROR LEXICO, No se permiten mas de dos decimales
-#                 dot_count += 1  
-#                 num_srt += '.'
-#             else:
-#                 num_srt += self.current_char
-#             self.advance()
-
-#         if dot_count==0:
-#             writeLexTitle(lex=num_srt,token='CteEnt')
-#             return Token(TT_INT, int(num_srt))
-#         else:
-#             writeLexTitle(lex=num_srt,token='CteReal')
-#             return Token(TT_FLOAT, float(num_srt ))
-
 
             ########################## 
             # OPERADORES ARITMETICOS #
@@ -191,6 +175,9 @@ class Lexico:
                 tokens.append(Token(TT_POW))
                 self.advance()
             
+            ###################################
+            # OPERADOR DE ASIGNACION <OpAsig> #
+            ###################################
             ################# 
             # DELIMITADORES #
             ################# 
@@ -212,6 +199,7 @@ class Lexico:
                 tokens.append(Token(TT_RBRA))
                 self.advance() 
             elif self.current_char == '\n':
+                line += 1
                 writeLexTitle(lex='\_n',token='Delim')
                 tokens.append(Token(TT_NL))
                 self.advance()
@@ -234,7 +222,7 @@ class Lexico:
             # OPERADORES RELACIONALES <OpRel> #
             ###################################
 
-            elif self.current_char in TT_OPREL:
+            elif self.current_char in OPREL:
                 tokens.append(self.Op_Log(line,char))
 
             
@@ -242,32 +230,18 @@ class Lexico:
             # OPERADORES LOGICOS <OpLog> #
             ##############################
             
-            # Agregar funcion para identificar -> Tienen que  tener espacios  ( _ es igua a espacio ' ')
-            # _y_
             elif self.current_char == 'y':
                 writeLexTitle(lex='y',token='OpLog')
                 tokens.append(Token(TT_Y))
                 self.advance()
-            # _o_
+
             elif self.current_char == 'o':
                 writeLexTitle(lex='o',token='OpLog')
                 tokens.append(Token(TT_O))
                 self.advance()
-            # _no_                                          TO BE IMPLEMENTED
-            # elif self.current_char == 'n':
-            #     writeLexTitle(lex='y',token='OpLog')
-            #     tokens.append(Token(TT_Y))
-            #     self.advance()
+          
 
-            # elif self.current_char == 'y':
-            #     tokens.append(Token(TT_IGUAL))
-            #     self.advance()
 
-            ###################################
-            # OPERADOR DE ASIGNACION <OpAsig> #
-            ###################################
-
-            # Agregar funcion de deteccion de operador de asignacion -> :=
 
 
 
@@ -294,12 +268,14 @@ class Lexico:
                 opDelAsig += self.current_char
             elif self.current_char == "=":
                 opDelAsig += self.current_char
+                writeLexTitle(lex=opDelAsig,token='OpAsig')    
+                self.advance()
+                return Token(TT_ASIG)   
             self.advance()
         
-        if opDelAsig == ":=":
-            writeLexTitle(lex=opDelAsig,token='OpAsig')    
-            return Token(TT_ASIG)
-        elif opDelAsig == ":": 
+        
+            
+        if opDelAsig == ":": 
             writeLexTitle(lex=opDelAsig,token='Delim')    
             return Token(TT_DOBDOT)
         else: ########### QUITAR RETURN ###############
@@ -307,16 +283,43 @@ class Lexico:
 
     def genString(self,line,char):
         op_String = ''
+        conString = False
+
         while self.current_char != None and self.current_char not in Delim and self.current_char != ' ':
-            op_String += self.current_char
+            
+            # Retorna los alfanumericos (Strings)
+            if self.current_char == '"' :
+                op_String += self.current_char
+                conString = True
+                self.advance()
+                while self.current_char != '"' and self.current_char != None: # None se tiene que cambir a \n
+                    op_String += self.current_char
+                    self.advance()
+                if self.current_char == '"' and conString == True:
+                    op_String += self.current_char
+                    self.advance()
+                    writeLexTitle(lex=op_String,token='CteAlfa')    
+                    return Token(TT_STRING,op_String)
+                    break
+                else:
+                    # ERROR 
+                    pass
+            else:
+                op_String += self.current_char
             self.advance()
 
-        if self.current_char not in Delim:
-            IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO: Esperado ';', ',', '.', ':'",codeError=op_String)
+        if op_String in PalRes:
+            writeLexTitle(lex=op_String,token='PalRes')    
+            return Token(TT_PALRES,value=op_String)
+        elif op_String == "no":
+            writeLexTitle(lex=op_String,token='OpLog')    
+            return Token(TT_NO,value=op_String)
+        elif op_String == "verdadero" or op_String == "falso":
+            writeLexTitle(lex=op_String,token='CteLog')    
+            return Token(TT_BOOL,value=op_String)
         else:
             writeLexTitle(lex=op_String,token='Ident')    
-            return Token(TT_IDNT,op_String)
-
+            return Token(TT_IDNT,value=op_String)
       
     def Op_Log(self,line,char):
         opLog = ''
@@ -352,7 +355,6 @@ class Lexico:
             return Token(TT_MAYIG, opLog)
         else:
             IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=opLog)#break #ERROR LEXICO, No se permiten mas de dos decimales
-
 
     def make_number(self,line,char):
         num_srt = ''
@@ -519,7 +521,7 @@ def runBasicLex(text):
     #tokens.remove(None)
     # print(tokens)
 
-    # print(tokens)
+    print(tokens)
 
     if len(tokens) <= 1:
         writeErrTitle("#"," - ", "<FatalError>","No se generaron tokens")
@@ -535,10 +537,4 @@ def runBasicLex(text):
     # print(ast.node)
     # print(ast.error)
     
-    return tokens, None ,None
-
-
-
-#(21+2)*2
-
-# (21:entero, suma, 2 entreo),mult*2
+    # return tokens, None ,None

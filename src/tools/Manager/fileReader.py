@@ -8,14 +8,20 @@
 def fileReader():
 
     try:
-        fileR = open("./data/test.up","r")
+        fileR = open("./data/examen.up","r")
     except:
         print("ERROR: Archivo buscado no encontrado")
         return "ERROR"
 
-    fileR = fileR.read().split("\n")
-    fileNocomments = ""
+    return fileR.read()
 
+    fileR = fileR.read().split("\n")
+
+    fileNocomments = ""
+    for i in fileR:
+        fileNocomments += i
+
+    return fileNocomments
     changeSpace = False
 
     numOfLines = 0

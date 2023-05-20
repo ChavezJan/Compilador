@@ -24,17 +24,20 @@ if __name__ == "__main__":
     fileErrCreate()
     fileLexCreate()
     
-    fileNoComments, numOfLines = fileReader()
+    codigo = fileReader()
     
+    # print(codigo)
     # Pase Lexico
     
-    text = input('basic > ')
-    try:
-        result, ast ,error = runBasicLex(text)
-        if error: print(error.as_string())
-        else: print(f'{result} \n{ast}')
-    except:
-        print(f'ERROR')
+    # text = input('basic > ')
+    # runBasicLex(text)
+    runBasicLex(codigo)
+    # try:
+    #     result, ast ,error = runBasicLex(text)
+    #     if error: print(error.as_string())
+    #     else: print(f'{result} \n{ast}')
+    # except:
+    #     print(f'ERROR')
         
 
 
