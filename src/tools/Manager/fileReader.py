@@ -8,12 +8,12 @@
 def fileReader():
 
     try:
-        fileR = open("./data/examen.up","r")
+        fileR = open("./data/test.up","r")
     except:
         print("ERROR: Archivo buscado no encontrado")
         return "ERROR"
 
-    return fileR.read()
+    return fileR.read().lower()
 
     fileR = fileR.read().split("\n")
 

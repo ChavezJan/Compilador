@@ -2,10 +2,3 @@ Error Manager - 2023-05-20
 -----------------------------------------------------------------------------
 | Linea | Error |        Descripción        |        Linea del Error        |
 -----------------------------------------------------------------------------
-| 4 | c | <Lexico>Error ALFANUMERICO | ::
-| 4 | c | <Lexico>Error ALFANUMERICO | ::
-| 21 | c | <Lexico>Error ALFANUMERICO | ::
-| 27 | c | <Lexico>Error ALFANUMERICO | ::
-| 35 | c | <Lexico>Error ALFANUMERICO | ::
-| 38 | c | <Lexico>Error ALFANUMERICO | :::
-| 82 | c | <Lexico>Error ALFANUMERICO | >Vector[j])
