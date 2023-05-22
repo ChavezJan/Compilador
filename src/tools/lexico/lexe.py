@@ -9,6 +9,7 @@
 from src.tools.Manager.errorManager import *
 from src.tools.Manager.lexemasManager import *
 from src.tools.TablaSim.simTable import makeSimTable
+from src.tools.sintactico.AnalizadorSintactico import *
 
 import string
 
@@ -245,7 +246,7 @@ class Lexico:
                 tokens.append(self.delAsig(line,char))
             elif self.current_char == ';':
                 writeLexTitle(lex=';',token='Delim')
-                tokens.append(Token(TT_SEMCOMA, line=line,pos_start=self.pos))
+                tokens.append(Token(TT_SEMCOMA,value=';', line=line,pos_start=self.pos))
                 self.advance()
 
             ################################### 
@@ -276,7 +277,7 @@ class Lexico:
             else:
                 tokens.append(self.genString(line,char))
 
-            print(tokens[-1])
+            # print(tokens[-1])
             if tokens[-1].value in PalAltoNivel:
                 tipo = tokens[-1].value
             elif tokens[-1].type == TT_IDNT:
@@ -286,7 +287,11 @@ class Lexico:
                     dato.append('C')
             elif tokens[-1].type in CONSTA:
                 dato.append(type(tokens[-1].type))
-            simTable.append(dato)
+                dato.append(tokens[-1].value)
+            elif tokens[-1].value == ';':
+                simTable.append(dato)
+                dato = []
+            print(tokens[-1].value)
         print(simTable)
 
 
@@ -644,6 +649,7 @@ class Interpreter:
 def runBasicLex(text):
     lexico = Lexico(text)
     tokens, error = lexico.make_token() 
+    print(tokens)
 
     if len(tokens) <= 1:
         writeErrTitle("#"," - ", "<FatalError>","No se generaron tokens")        
@@ -662,10 +668,12 @@ def runBasicLex(text):
     # send data to the table
     # makeSimTable(tokens)
 
-    # # Generate AST 
-    # parser = Parser(tokens)
-    # ast = parser.parse()
-    # if ast.error: return None, ast.error
+    # Generate AST 
+    parser = Parser(tokens)
+    ast = parser.parse()
+    if ast.error: return None, ast.error
+
+    runSyntax(tokens)
 
     # #Run program
     # interpreter = Interpreter()

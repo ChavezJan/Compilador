@@ -1,4 +1,5 @@
-Error Manager - 2023-05-21
+Error Manager - 2023-05-22
 -----------------------------------------------------------------------------
 | Linea | Error |        Descripción        |        Linea del Error        |
 -----------------------------------------------------------------------------
+| 1 | error | IllegalSyntaxError: Esperado Entero o Real | test
