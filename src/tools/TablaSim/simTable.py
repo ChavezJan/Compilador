@@ -6,6 +6,9 @@
     ID: 0214778
     ID: 0208421
 """
+
+from src.tools.Manager.errorManager import *
+
 ##############
 # CONSTANTES # 
 ##############
@@ -20,6 +23,8 @@ TT_INT = 'ENTERO'
 TT_FLOAT = 'REAL'
 TT_STRING = 'ALFANUMERICO' # Pendiente
 TT_BOOL = 'LOGICO'         # Pendiente
+
+CONSTA = [TT_INT,TT_FLOAT,TT_BOOL,TT_STRING]
 
 # OPERADORES ARITMETICOS <OpArit> # -> Listo
 TT_PLUS = 'SUMA'
@@ -83,15 +88,36 @@ class TableSim:
         return self.current_tok
     
     def createTable(self):
+        tempList=[]
+        # var / const
+        id =''
+        value = ''
+        tipo = ['V','C','F','P']
         
         while self.current_tok.type != TT_EOF:
             if self.current_tok.type == TT_PALRES:
-                print(self.current_tok.value)
+                print(self.current_tok)
+                if self.current_tok.value == 'constantes':
+                    self.advance()
+                    if self.current_tok.type == TT_IDNT:
+                        id = self.current_tok.value
+                    self.advance()
+                    self.advance()
+                    if self.current_tok.type in CONSTA:
+                        value = self.current_tok.value
+                        tempList.append([id,tipo[1],type(value),0,0,value])
+                    
+                    else:
+                        IllegalSyntaxError(self.current_tok.line,self.current_tok.type,"SimTable ERROR, no fue posible crear la tabla", self.current_tok.value)
+                    
+
+
+
+
             self.advance()
+        return tempList
 
 def makeSimTable(tokens):
     simTable = TableSim(tokens)
     # print(tokens)
-    simTable.createTable()
-
-
+    print(simTable.createTable())

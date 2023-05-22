@@ -9,6 +9,9 @@
 from src.tools.Manager.errorManager import *
 from src.tools.Manager.lexemasManager import *
 from src.tools.TablaSim.simTable import makeSimTable
+
+import string
+
 ##############
 # CONSTANTES # 
 ##############
@@ -87,11 +90,20 @@ TT_EOF = 'ENDOFFILE'
 ##########
 
 class Token:
-    def __init__(self, type_, line=None ,value=None):
+    def __init__(self, type_, line=None ,value=None,pos_start=None, pos_end=None):
         self.type = type_
         self.value = value
         self.line = line 
 
+        if pos_start:
+            self.pos_start = pos_start.copy()
+            self.pos_end = pos_start.copy()
+            self.pos_end.advance()
+        if pos_end:
+           self.pos_end = pos_end.copy()
+    
+    def matches(self, type_, value):
+        return self.type == type_ and self.value == value
 
     def __repr__(self) -> str:
         if self.value: return f'[{self.type}:{self.value}:{self.line}]'
@@ -102,24 +114,24 @@ class Token:
 ############
 
 class Position:
-    def __init__(self,idx,ln,col,text):
-        self.idx = idx
-        self.ln = ln
-        self.col = col
-        self.text = text
+	def __init__(self, idx, ln, col, ftxt):
+		self.idx = idx
+		self.ln = ln
+		self.col = col
+		self.ftxt = ftxt
 
-    def advance(self, current_char=None):
-        self.idx += 1
-        self.col += 1
+	def advance(self, current_char=None):
+		self.idx += 1
+		self.col += 1
 
-        if current_char ==  '\n':
-            self.ln += 1 
-            self.col = 0
-        
-        return self
-    
-    def copy(self):
-        return Position(self.idx,self.ln,self.col)
+		if current_char == '\n':
+			self.ln += 1
+			self.col = 0
+
+		return self
+
+	def copy(self):
+		return Position(self.idx, self.ln, self.col, self.ftxt)
 
 ##########
 # LEXICO # 
@@ -147,7 +159,7 @@ class Lexico:
                 self.advance()
             elif self.current_char == '\t':
                 writeLexTitle(lex='\_t',token='Delim')
-                tokens.append(Token(TT_TAB, line=line))
+                tokens.append(Token(TT_TAB, line=line,pos_start=self.pos))
                 self.advance()
 
             ###########
@@ -163,27 +175,27 @@ class Lexico:
 
             elif self.current_char == '+':
                 writeLexTitle(lex='+',token='OpArit')
-                tokens.append(Token(TT_PLUS, line=line))
+                tokens.append(Token(TT_PLUS, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
                 writeLexTitle(lex='-',token='OpArit')
-                tokens.append(Token(TT_MINUS, line=line))
+                tokens.append(Token(TT_MINUS, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '*':
                 writeLexTitle(lex='*',token='OpArit')
-                tokens.append(Token(TT_MUL, line=line))
+                tokens.append(Token(TT_MUL, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '/':
                 writeLexTitle(lex='/',token='OpArit')
-                tokens.append(Token(TT_DIV, line=line))
+                tokens.append(Token(TT_DIV, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '%':
                 writeLexTitle(lex='%',token='OpArit')
-                tokens.append(Token(TT_MOD, line=line))
+                tokens.append(Token(TT_MOD, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '^':
                 writeLexTitle(lex='^',token='OpArit')
-                tokens.append(Token(TT_POW, line=line))
+                tokens.append(Token(TT_POW, line=line,pos_start=self.pos))
                 self.advance()
             
             ###################################
@@ -195,38 +207,38 @@ class Lexico:
 
             elif self.current_char == '(':
                 writeLexTitle(lex='(',token='Delim')
-                tokens.append(Token(TT_LPAREN, line=line))
+                tokens.append(Token(TT_LPAREN, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == ')':
                 writeLexTitle(lex=')',token='Delim')
-                tokens.append(Token(TT_RPAREN, line=line))
+                tokens.append(Token(TT_RPAREN, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == '[':
                 writeLexTitle(lex='[',token='Delim')
-                tokens.append(Token(TT_LBRA, line=line))
+                tokens.append(Token(TT_LBRA, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == ']':
                 writeLexTitle(lex=']',token='Delim')
-                tokens.append(Token(TT_RBRA, line=line))
+                tokens.append(Token(TT_RBRA, line=line,pos_start=self.pos))
                 self.advance() 
             elif self.current_char == '\n':
                 writeLexTitle(lex='\_n',token='Delim')
-                tokens.append(Token(TT_NL, line=line))
+                tokens.append(Token(TT_NL, line=line,pos_start=self.pos))
                 self.advance()
                 line += 1
             elif self.current_char == '.':
                 writeLexTitle(lex='.',token='Delim')
-                tokens.append(Token(TT_DOT, line=line))
+                tokens.append(Token(TT_DOT, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == ',':
                 writeLexTitle(lex=',',token='Delim')
-                tokens.append(Token(TT_COMA, line=line))
+                tokens.append(Token(TT_COMA, line=line,pos_start=self.pos))
                 self.advance()
             elif self.current_char == ':':
                 tokens.append(self.delAsig(line,char))
             elif self.current_char == ';':
                 writeLexTitle(lex=';',token='Delim')
-                tokens.append(Token(TT_SEMCOMA, line=line))
+                tokens.append(Token(TT_SEMCOMA, line=line,pos_start=self.pos))
                 self.advance()
 
             ################################### 
@@ -242,12 +254,12 @@ class Lexico:
             
             elif self.current_char == 'y':
                 writeLexTitle(lex='y',token='OpLog')
-                tokens.append(Token(TT_Y, line=line))
+                tokens.append(Token(TT_Y, line=line,pos_start=self.pos))
                 self.advance()
 
             elif self.current_char == 'o':
                 writeLexTitle(lex='o',token='OpLog')
-                tokens.append(Token(TT_O, line=line))
+                tokens.append(Token(TT_O, line=line,pos_start=self.pos))
                 self.advance()          
 
             ##############
@@ -271,7 +283,7 @@ class Lexico:
                 opDelAsig += self.current_char
                 writeLexTitle(lex=opDelAsig,token='OpAsig')    
                 self.advance()
-                return Token(TT_ASIG, line=line)   
+                return Token(TT_ASIG, line=line,pos_start=self.pos)   
             else:
                 break
             self.advance()
@@ -281,7 +293,7 @@ class Lexico:
         if opDelAsig == ":": 
             writeLexTitle(lex=opDelAsig,token='Delim')
             # self.advance()
-            return Token(TT_DOBDOT, line=line)
+            return Token(TT_DOBDOT, line=line,pos_start=self.pos)
         else: ########### QUITAR RETURN ###############
             IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=opDelAsig)#break #ERROR LEXICO, No se permiten mas de dos decimales
 
@@ -305,7 +317,7 @@ class Lexico:
                     op_String += self.current_char
                     self.advance()
                     writeLexTitle(lex=op_String,token='CteAlfa')    
-                    return Token(TT_STRING,value=op_String, line=line)
+                    return Token(TT_STRING,value=op_String, line=line,pos_start=self.pos)
                     break
                 else:
                     # ERROR 
@@ -316,21 +328,21 @@ class Lexico:
 
         if op_String in PalRes:
             writeLexTitle(lex=op_String,token='PalRes')    
-            return Token(TT_PALRES,value=op_String, line=line)
+            return Token(TT_PALRES,value=op_String, line=line,pos_start=self.pos)
         elif op_String == "no":
             writeLexTitle(lex=op_String,token='OpLog')    
             return Token(TT_NO,value=op_String, line=line)
         elif op_String == "verdadero" or op_String == "falso":
             writeLexTitle(lex=op_String,token='CteLog')    
-            return Token(TT_BOOL,value=op_String, line=line)
+            return Token(TT_BOOL,value=op_String, line=line,pos_start=self.pos)
         else:
             writeLexTitle(lex=op_String,token='Ident')    
-            return Token(TT_IDNT,value=op_String, line=line)
+            return Token(TT_IDNT,value=op_String, line=line,pos_start=self.pos)
       
     def Op_Log(self,line,char):
         opLog = ''
 
-        while self.current_char != None and self.current_char != TT_EOF and self.current_char != ' ':
+        while self.current_char != None and self.current_char != TT_EOF and self.current_char != ' ' and self.current_char in OPREL:
             if self.current_char == '=':
                 opLog += self.current_char
             elif self.current_char == '>':
@@ -343,22 +355,22 @@ class Lexico:
 
         if opLog == "=":
             writeLexTitle(lex=opLog,token='OpRel')    
-            return Token(TT_IGUAL, line=line)
+            return Token(TT_IGUAL, line=line,pos_start=self.pos)
         elif opLog == "<":
             writeLexTitle(lex=opLog,token='OpRel')    
-            return Token(TT_MENQ, line=line)
+            return Token(TT_MENQ, line=line,pos_start=self.pos)
         elif opLog == ">":
             writeLexTitle(lex=opLog,token='OpRel')    
-            return Token(TT_MAYQ, line=line)
+            return Token(TT_MAYQ, line=line,pos_start=self.pos)
         elif opLog == "<>":
             writeLexTitle(lex=opLog,token='OpRel')    
-            return Token(TT_DIF, line=line)
+            return Token(TT_DIF, line=line,pos_start=self.pos)
         elif opLog == "<=": 
             writeLexTitle(lex=opLog,token='OpRel')    
-            return Token(TT_MENIG, line=line)
+            return Token(TT_MENIG, line=line,pos_start=self.pos)
         elif opLog == ">=": 
             writeLexTitle(lex=opLog,token='OpRel')    
-            return Token(TT_MAYIG, line=line)
+            return Token(TT_MAYIG, line=line,pos_start=self.pos)
         else:
             IllegalCharError(line,error=char,description="<Lexico>Error ALFANUMERICO",codeError=opLog)#break #ERROR LEXICO, No se permiten mas de dos decimales
 
@@ -384,10 +396,11 @@ class Lexico:
 
         if dot_count==0:
             writeLexTitle(lex=num_srt,token='CteEnt')
-            return Token(TT_INT, value=int(num_srt), line=line)
+            return Token(TT_INT, value=int(num_srt), line=line,pos_start=self.pos)
         elif dot_count == 1:
             writeLexTitle(lex=num_srt,token='CteReal')
-            return Token(TT_FLOAT, value=float(num_srt ), line=line)
+            return Token(TT_FLOAT, value=float(num_srt ), line=line,pos_start=self.pos)
+
 
 #########
 # NODES # 
@@ -396,6 +409,9 @@ class Lexico:
 class NumberNode:
     def __init__(self,tok):
         self.tok = tok
+
+        self.pos_start = self.tok.pos_start
+        self.pos_end = self.tok.pos_end
 
     def __repr__(self) -> str:
         return f'{self.tok}'
@@ -406,6 +422,9 @@ class BinOpNode:
         self.op_tok = op_tok
         self.right_node = right_node
 
+        self.pos_start = self.left_node.pos_start
+        self.pos_end = self.right_node.pos_end
+
     def __repr__(self) -> str:
         return f'({self.left_node}, {self.op_tok}, {self.right_node})'
     
@@ -413,6 +432,9 @@ class UnaryOpNode:
     def __init__(self,op_tok,node):
         self.op_tok = op_tok
         self.node = node
+
+        self.pos_start = self.op_tok.pos_start
+        self.pos_end = self.op_tok.pos_end
 
     def __repr__(self) -> str:
         return f'({self.op_tok},{self.node})'
@@ -517,6 +539,86 @@ class Parser:
         return res.success(left)
 
 #####################
+# VALUES    # 
+##################### 
+
+class Number:
+    def __init__(self, value):
+        self.value = value
+        self.set_pos(
+        )
+    
+    def set_pos(self, pos_start = None, pos_end = None):
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+        return self
+    
+    #SUMA
+    def added_to(self, other):
+        if isinstance(other, Number):
+            return Number(self.value + other.value)
+        
+    #RESTA
+    def subbed_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value - other.value)
+    
+    #MULTIPLICACION
+    def multed_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value * other.value)
+    
+    #DIVICION
+    def divided_by(self, other):
+        if isinstance(other, Number):
+            return Number(self.value / other.value)
+    
+    def __repr__(self):
+        return str(self.value)
+
+#####################
+# INTERPRETER # 
+#####################   
+
+class Interpreter:
+    #método para visita de nodos y obtener información de c/u
+    def visit(self,node):
+        method_name = f'visit_{type(node).__name__}'
+        method = getattr(self, method_name, self.no_visit_method)
+        return method(node)
+    
+    def no_visit_method(self, node):
+        raise Exception(f'No visit_{type(node).__name__} method defined')
+    
+    def visit_NumberNode(self, node):
+        return Number(node.tok.value).set_pos(node.pos_start, node.pos_end)
+    
+    def visit_BinOpNode(self, node):
+        left = self.visit(node.left_node)
+        right = self.visit(node.right_node)
+
+        if node.op_tok.value == TT_PLUS:
+            result = left.added_to(right)
+        elif node.op_tok.value == TT_MINUS:
+            result = left.subbed_by(right)
+        elif node.op_tok.value == TT_MUL:
+            result = left.multed_by(right)
+        elif node.op_tok.value == TT_DIV:
+            result = left.divided_by(right)
+
+        return result.set_pos(node.pos_start, node.pos_end)
+    
+    def visit_UnaryOpNode(self, node):
+        number = self.visit(node.node)
+
+        if node.op_tok.type == TT_MINUS:
+            number= number.multed_by(Number(-1))
+
+        return number.set_pos(node.pos_start, node.pos_end)
+        
+    
+
+#####################
 # EXECUTE BASIC LEX # 
 #####################
 
@@ -524,27 +626,30 @@ def runBasicLex(text):
     lexico = Lexico(text)
     tokens, error = lexico.make_token() 
 
-    #tokens.remove(None)
-    # print(tokens)
-
-    # print(tokens)
-
     if len(tokens) <= 1:
-        writeErrTitle("#"," - ", "<FatalError>","No se generaron tokens")
-        # return None,None,None
+        writeErrTitle("#"," - ", "<FatalError>","No se generaron tokens")        
+
+    for i in range(len(tokens)):
+        if tokens[i] == None:
+            IllegalCharError("#","None","<FatalError> Error leyendo un token","None")
+            tokens.remove(tokens[i])
+
+    for i in range(len(tokens)):
+        if tokens[i] == None:
+            print("NONE")
 
     if error: return None, error
 
-    #send data to the table
+    # send data to the table
     makeSimTable(tokens)
 
-
-    # Generate AST 
+    # # Generate AST 
     # parser = Parser(tokens)
     # ast = parser.parse()
-    # # return tokens, ast.node ,ast.error
+    # if ast.error: return None, ast.error
 
-    # print(ast.node)
-    # print(ast.error)
-    
-    # return tokens, None ,None
+    # #Run program
+    # interpreter = Interpreter()
+    # result = interpreter.visit(ast.node)
+
+    # return result, None
