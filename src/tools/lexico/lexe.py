@@ -27,6 +27,8 @@ TT_FLOAT = 'REAL'
 TT_STRING = 'ALFANUMERICO' # Pendiente
 TT_BOOL = 'LOGICO'         # Pendiente
 
+CONSTA = [TT_INT,TT_FLOAT,TT_BOOL,TT_STRING]
+
 # OPERADORES ARITMETICOS <OpArit> # -> Listo
 TT_PLUS = 'SUMA'
 TT_MINUS = 'RESTA'
@@ -79,6 +81,7 @@ TT_IDNT = 'IDENTIFICADOR'
 # Palabras reservadas <PalRes>
 TT_PALRES = 'PALRES'
 PalRes = ["constantes", "variables", "real", "alfabetico", "logico", "entero", "funcion", "inicio", "fin", "de", "procedimiento", "regresa", "si", "hacer", "sino", "cuando", "el", "valor", "sea", "otro", "desde", "hasta", "incr", "decr", "repetir", "que", "mientras", "se", "cumpla", "continua", "interrumpe", "limpia", "lee", "imprime", "imprimenl", "verdadero", "falso", "programa", "fin de programa.", "fin de procedimiento","fin de funcion"]
+PalAltoNivel = ["constantes", "variables", "funcion","procedimiento"]
 
 # Extras #
 TT_EOF = 'ENDOFFILE'
@@ -150,8 +153,12 @@ class Lexico:
 
     def make_token(self):
         tokens = []
+        simTable = []
         line = self.pos.ln + 1
         char = self.current_char
+        tipo = ''
+        dato = []
+        
 
         while self.current_char != None:
             # print(self.current_char)
@@ -269,7 +276,19 @@ class Lexico:
             else:
                 tokens.append(self.genString(line,char))
 
-                
+            print(tokens[-1])
+            if tokens[-1].value in PalAltoNivel:
+                tipo = tokens[-1].value
+            elif tokens[-1].type == TT_IDNT:
+                id = tokens[-1].value
+                dato.append(id.upper())
+                if tipo == 'constantes':
+                    dato.append('C')
+            elif tokens[-1].type in CONSTA:
+                dato.append(type(tokens[-1].type))
+            simTable.append(dato)
+        print(simTable)
+
 
         tokens.append(Token(TT_EOF, line=line))
         return tokens, None
@@ -641,7 +660,7 @@ def runBasicLex(text):
     if error: return None, error
 
     # send data to the table
-    makeSimTable(tokens)
+    # makeSimTable(tokens)
 
     # # Generate AST 
     # parser = Parser(tokens)
